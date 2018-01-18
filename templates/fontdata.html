@@ -1,0 +1,103 @@
+$def with (filename, basename, filetype, metadatas, features, head, cmap)
+
+<style>
+    @font-face {
+        font-family: "$basename";
+        src: url("/thefont") format("$filetype")
+    }
+    .preview {
+        font-family: "$basename", serif;
+    }
+</style>
+<h2>Info about "$(filename)"</h2>
+
+<p>$(", ".join(head))</p>
+
+<h3>Features <a href="https://en.wikipedia.org/wiki/List_of_typographic_features">?</a></h3>
+$(len(features))
+$if len(features) == 1:
+    feature
+$else:
+    features
+
+$if len(features) > 0:
+    <table class="tabular">
+    $for item in features:
+        <tr>
+            <td>$(item["feature"])</td>
+            <td class="small"><small>$(item["table"]) index$(item["index"])</small></td>
+            $if "glyphs" in item:
+                <td>
+                    <div class="preview" style="font-feature-settings: '$(item["feature"])' 1">
+                        $for glyph in item["glyphs"]:
+                            <i title="$(item["glyphs"][glyph])">&#$glyph;</i>
+                    </div>
+                </td>
+            $else:
+                <td></td>
+        </tr>
+    </table>
+
+<h3>Glyphs</h3>
+
+$if len(features) > 0:
+    $ list = set([item["feature"] for item in features])
+     
+    <div class="settings">
+        <label for="select-feature">Feature:</label>
+        <select id="select-feature" autocomplete="off">
+            <option value="">(none)</option>
+            $for item in list:
+                <option value="$item">$item</option>
+        </select>
+    </div>
+
+<div id="preview">
+    
+    <!-- GLYPHS PREVIEW -->
+    <table class="glyphs preview">
+    $for row, list in cmap:
+        <tr>
+            $ index = int(row)*16
+            <th>$(hex(index)[2:].zfill(4))</th>
+            $for column in range(index, index + 16):
+                $if column in list:
+                    <td class="cell" title="$(list[column])">
+                        $if column != 0:
+                            &#$('{0:04d}'.format(column));
+                    </td>
+                $else:
+                    <td class="empty"></td>
+        </tr>
+    </table>
+
+    <!-- TEXTAREA PREVIEW -->
+    <div class="userinput">
+        <label for="userinput">Enter the text you want to preview:</label>
+    <textarea id="userinput" class="preview">The quick brown fox jumps over the lazy dog
+THE QUICK BOWN FOX JUMPS OVER THE LAZY DOG</textarea>
+    </div>
+
+</div>
+
+<h3>Metadatas</h3>
+
+<table class="light">
+    $for item in metadatas:
+        <tr><th>$(item["name"])</th><td>$(item["value"])</td></tr>
+</table>
+
+<br>
+<a href="/thefont" download="$(basename).$filetype">Download $(basename).$filetype</a>
+
+$if len(features) > 0:
+    <script>
+        window.onload = function() {
+            var container = document.body.querySelector("#preview");
+
+            document.body.querySelector("#select-feature").addEventListener("change", function(e){
+                var choice = e.target.value;
+                container.style["fontFeatureSettings"] = (choice ? "'" + choice + "' 1" : "unset");
+            });
+        };
+    </script>

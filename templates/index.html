@@ -1,0 +1,37 @@
+$def with (error, fontdata)
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8" />
+		<title>Font infos</title>
+		<link rel="stylesheet" href="static/css/style.css" type="text/css" media="screen" charset="utf-8"/>
+	</head>
+	<body>
+		<h1>List glyphs & features in font</h1>
+		<h2>Upload your font</h2>
+		$if error:
+			<p class="alert alert-danger">$error</p>
+		
+		<form id="upload" enctype="multipart/form-data" method="post">
+			<div class="row">
+				<label for="file">File: </label>
+				<div>
+					<input type="file" id="file" name="file" />
+					<br>
+					<small>Accepts: TTF, OTF, WOFF, WOFF2</small>
+				</div>
+			</div>
+			<div class="row">
+				<label for="url">URL: </label>
+				<input type="text" id="url" name="url" />
+			</div>
+			<div class="action">
+				<input type="submit" name="submit" />
+			</div>
+		</form>
+
+		$if fontdata:
+			$:fontdata
+	</body>
+</html>
