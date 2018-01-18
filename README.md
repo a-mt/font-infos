@@ -1,5 +1,6 @@
 
 List the character map, metadatas and features of a given font.  
+Demo: http://font-infos.herokuapp.com/  
 Inspiration: http://torinak.com/font/lsfont.html
 
 ## Install
@@ -43,3 +44,13 @@ To list active Internet connections:
 To stop it:
 
     kill <PID>
+
+## Deploy on Heroku
+
+    heroku login
+    heroku create
+    heroku buildpacks:set heroku/python
+    heroku buildpacks:add https://github.com/weibeld/heroku-buildpack-run.git
+    git push heroku master
+    heroku ps:scale web=1
+    heroku open

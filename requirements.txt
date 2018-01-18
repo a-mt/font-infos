@@ -1,0 +1,4 @@
+requests
+fonttools
+brotli
+web.py
