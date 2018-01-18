@@ -8,6 +8,22 @@ $def with (filename, basename, filetype, metadatas, features, head, cmap)
     .preview {
         font-family: "$basename", serif;
     }
+$if len(features) > 0:
+    $ list = set([item["feature"] for item in features])
+
+    .support::after {
+        content: "Your browser doesn't support it";
+        font-size: .8em;
+        font-style: italic;
+        float: right;
+        color: rebeccapurple;
+    }
+    $for item in list:
+        @supports (font-feature-settings: "$item" 1) {
+          .support-$item::after {
+            content: "";
+          }
+        }
 </style>
 <h2>Info about "$(filename)"</h2>
 
@@ -24,7 +40,7 @@ $if len(features) > 0:
     <table class="tabular">
     $for item in features:
         <tr>
-            <td>$(item["feature"])</td>
+            <td><span class="support support-$(item["feature"])">$(item["feature"])</span></td>
             <td class="small"><small>$(item["table"]) index$(item["index"])</small></td>
             $if "glyphs" in item:
                 <td>
@@ -41,8 +57,6 @@ $if len(features) > 0:
 <h3>Glyphs</h3>
 
 $if len(features) > 0:
-    $ list = set([item["feature"] for item in features])
-     
     <div class="settings">
         <label for="select-feature">Feature:</label>
         <select id="select-feature" autocomplete="off">

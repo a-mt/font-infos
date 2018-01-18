@@ -229,17 +229,30 @@ def fontdata(filename, filetype, filesize, file):
 			elif hasattr(table, 'alternates'):
 				data[index]["glyphs"] = {codes[clean(k)]:k for k in table.alternates if clean(k) in codes}
 			elif hasattr(table, 'ligatures'):
-				data[index]["glyphs"] = {codes[clean(k)]:k for k in table.ligatures if clean(k) in codes}
+				glyphs = {}
+
+				for k in table.ligatures:
+					for lig in table.ligatures[k]:
+						for glyph in lig.Component:
+							if clean(glyph) in codes:
+								glyphs[codes[clean(glyph)]] = glyph
+
+				data[index]["glyphs"] = glyphs
 			elif hasattr(table, 'Coverage'):
 				data[index]["glyphs"] = {codes[clean(k)]:k for k in table.Coverage.glyphs if clean(k) in codes}
-			elif data[index]["feature"] == "mark" or data[index]["feature"] == "mkmk":
+			else:
 				for t in table.__dict__.keys():
 					if not t.endswith("Coverage"):
 						continue
-					data[index]["glyphs"] = {codes[clean(k)]:k for k in getattr(table, t).glyphs if clean(k) in codes}
-			else:
-				print data[index]
-				print table.__dict__.keys()
+
+					coverage = getattr(table, t)
+					if hasattr(coverage, "glyphs"):
+						data[index]["glyphs"] = {codes[clean(k)]:k for k in coverage.glyphs if clean(k) in codes}
+
+					# (psts) http://fonts.gstatic.com/s/teko/v7/UtekqODEqZXSN2L-njejpA.ttf
+					elif coverage and type(coverage) is list:
+						for r in coverage:
+							data[index]["glyphs"] = {codes[clean(k)]:k for k in r.glyphs if clean(k) in codes}
 
 		for index in sorted(data.keys(), key=int):
 			features.append(data[index]);
