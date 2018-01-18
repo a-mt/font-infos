@@ -225,18 +225,18 @@ def fontdata(filename, filetype, filesize, file):
 			# data[index]["format"] = table.Format
 
 			if hasattr(table, 'mapping'):
-				data[index]["glyphs"] = {codes[clean(k)]:k for k in table.mapping}
+				data[index]["glyphs"] = {codes[clean(k)]:k for k in table.mapping if clean(k) in codes}
 			elif hasattr(table, 'alternates'):
-				data[index]["glyphs"] = {codes[clean(k)]:k for k in table.alternates}
+				data[index]["glyphs"] = {codes[clean(k)]:k for k in table.alternates if clean(k) in codes}
 			elif hasattr(table, 'ligatures'):
-				data[index]["glyphs"] = {codes[clean(k)]:k for k in table.ligatures}
+				data[index]["glyphs"] = {codes[clean(k)]:k for k in table.ligatures if clean(k) in codes}
 			elif hasattr(table, 'Coverage'):
-				data[index]["glyphs"] = {codes[clean(k)]:k for k in table.Coverage.glyphs}
+				data[index]["glyphs"] = {codes[clean(k)]:k for k in table.Coverage.glyphs if clean(k) in codes}
 			elif data[index]["feature"] == "mark" or data[index]["feature"] == "mkmk":
 				for t in table.__dict__.keys():
 					if not t.endswith("Coverage"):
 						continue
-					data[index]["glyphs"] = {codes[clean(k)]:k for k in getattr(table, t).glyphs}
+					data[index]["glyphs"] = {codes[clean(k)]:k for k in getattr(table, t).glyphs if clean(k) in codes}
 			else:
 				print data[index]
 				print table.__dict__.keys()
