@@ -206,6 +206,8 @@ def fontdata(filename, filetype, filesize, file):
 	# Get features list for GPOS and GSUB
 	features = []
 	for table in ['GPOS', 'GSUB']:
+		if not table in font:
+			continue
 		data = {}
 
 		for record in font[table].table.FeatureList.FeatureRecord:
