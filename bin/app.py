@@ -3,14 +3,18 @@
 import web, os, requests
 from datetime import datetime
 from fontTools.ttLib import TTFont
+import json, tempfile
 
 web.config.debug = False  # to be able to use session
 DEBUG            = False  # dev mode
 
 urls = (
-	'/', 'index',           # The visibile app
-	'/thefont', 'thefont',  # Serve the uploaded .woff file
-	'/thedata', 'thedata'   # Serve the .ttx file (XML info file of font)
+	'/', 'index',                  # The visibile app
+	'/thefont', 'thefont',         # Serve the uploaded .woff file
+	'/thedata', 'thedata',         # Serve the .ttx file (XML info file of font)
+
+	'/googlefonts', 'googlefonts', # Update db.json with webfonts.json
+	'/list', 'list'                # Display db.json
 )
 
 app       = web.application(urls, globals())
@@ -18,6 +22,92 @@ session   = web.session.Session(app, web.session.DiskStore('sessions'), initiali
 render    = web.template.render('templates/')
 
 workspace = "/".join(os.path.realpath(__file__).split("/")[:-2]) # /home/ubuntu/workspace/bin/app.py -> /home/ubuntu/workspace
+
+# Display db.json
+class list:
+	def GET(self):
+		if not os.path.isfile(workspace + '/static/db.json'):
+			raise web.seeother("/")
+
+		try:
+			db = json.load(open(workspace + '/static/db.json'))
+		except:
+			raise web.seeother("/")
+
+		return render.list(db=db)
+
+# Update db.json with webfonts.json (retrieved with Google Fonts API)
+class googlefonts:
+	def GET(self):
+		if not os.path.isfile(workspace + '/static/webfonts.json'):
+			raise web.seeother("/")
+
+		# Open webfonts.json
+		dbpath = workspace + '/static/db.json'
+		db = {}
+
+		if os.path.isfile(workspace + '/static/db.json'):
+			text = open(dbpath).read()
+			if text != "":
+				db   = json.loads(text)
+				text = ""
+
+		out = open(dbpath, 'w')
+
+		# Check fonts we don't know about
+		items = json.load(open(workspace + '/static/webfonts.json'))[u'items']
+		i = 0
+		n = len(items)
+		for item in items:
+			family = item[u'family'].decode('utf-8','ignore').encode("utf-8")
+
+			# Print progress
+			i += 1
+			print str(i) + "/" + str(n) + " [" + family + "]",
+
+			if family in db or not u'regular' in item[u'files']:
+				print "- skipped"
+				continue
+
+			# Populate db
+			url = item[u'files'][u'regular']
+			about = {
+				u'category': item[u'category'],
+				u'version' : item[u'version'],
+				u'subsets' : sorted(item[u'subsets']),
+				u'file'    : url
+			}
+
+			# Get font
+			response = requests.get(url)
+			file = tempfile.TemporaryFile()
+			file.write(response.content)
+			file.seek(0)
+			font = TTFont(file)
+
+			# Get features list for GPOS and GSUB
+			features = {}
+			for table in ['GPOS', 'GSUB']:
+				if not table in font or not hasattr(font[table].table, "FeatureList") or not hasattr(font[table].table.FeatureList, "FeatureRecord"):
+					continue
+
+				for record in font[table].table.FeatureList.FeatureRecord:
+					features[str(record.FeatureTag)] = 1
+
+			about[u'filesize']  = hsize(int(response.headers['content-length']))
+			about[u'numGlyphs'] = font['maxp'].numGlyphs
+			about[u'features']  = sorted(features.keys())
+
+			db[family] = about
+			print ""
+			if i % 10 == 0:
+				json.dump(db, out, indent=4, separators=(',', ': '))
+				out.seek(0)
+
+			# Specimen : https://fonts.google.com/specimen/<family>
+
+		json.dump(db, out, indent=4, separators=(',', ': '))
+		raise web.seeother("/list")
 
 # Return .woff file
 class thefont:
@@ -50,6 +140,11 @@ class index:
 		content = session.fontdata
 		session.error = ""
 
+		params = web.input()
+		if hasattr(params, 'import'):
+			x = {'url': params['import']}
+			self.handleForm(x)
+
 		# Dev mode: recall fontdata every time
 		if DEBUG and session.filepath and os.path.isfile(session.filepath):
 			content = fontdata(
@@ -63,8 +158,10 @@ class index:
 
 	def POST(self):
 		x = web.input(file={})
+		self.handleForm(x)
 
-		if x['file'].filename != "":
+	def handleForm(self, x):
+		if hasattr(x, 'file') and x['file'].filename != "":
 			filename  = x['file'].filename
 			file      = x['file'].file
 			filesize  = os.fstat(file.fileno()).st_size
@@ -77,28 +174,7 @@ class index:
 			try:
 				response = requests.get(filename)
 			except Exception as e:
-				etype = e.__class__.__name__
-				msg   = etype + ": " + {
-					'HTTPError'            : "An HTTP error occurred.",
-					'ConnectionError'      : "A Connection error occurred.",
-					'ProxyError'           : "A proxy error occurred.",
-					'SSLError'             : "An SSL error occurred.",
-					'Timeout'              : "The request timed out.",
-					'ConnectTimeout'       : "The request timed out while trying to connect to the remote server.",
-					'ReadTimeout'          : "The server did not send any data in the allotted amount of time.",
-					'URLRequired'          : "A valid URL is required to make a request.",
-					'TooManyRedirects'     : "Too many redirects.",
-					'MissingSchema'        : "The URL schema (e.g. http or https) is missing.",
-					'InvalidSchema'        : "The URL schema is invalid (accepts http or https)",
-					'InvalidHeader'        : "The request was somehow invalid.",
-					'ChunkedEncodingError' : "The server declared chunked encoding but sent an invalid chunk.",
-					'ContentDecodingError' : "Failed to decode response content.",
-					'StreamConsumedError'  : "The content for this response was already consumed.",
-					'RetryError'           : "Custom retries logic failed.",
-					'UnrewindableBodyError': "Requests encountered an error when trying to rewind a body"
-				}.get(etype,  str(e))
-
-				session.error = msg
+				session.error = getHTTPError(e)
 				raise web.seeother("/")
 
 			filesize  = int(response.headers['content-length'])
@@ -154,6 +230,28 @@ class index:
 
 		raise web.seeother('/')
 
+def getHTTPError(e):
+	etype = e.__class__.__name__
+	return etype + ": " + {
+		'HTTPError'            : "An HTTP error occurred.",
+		'ConnectionError'      : "A Connection error occurred.",
+		'ProxyError'           : "A proxy error occurred.",
+		'SSLError'             : "An SSL error occurred.",
+		'Timeout'              : "The request timed out.",
+		'ConnectTimeout'       : "The request timed out while trying to connect to the remote server.",
+		'ReadTimeout'          : "The server did not send any data in the allotted amount of time.",
+		'URLRequired'          : "A valid URL is required to make a request.",
+		'TooManyRedirects'     : "Too many redirects.",
+		'MissingSchema'        : "The URL schema (e.g. http or https) is missing.",
+		'InvalidSchema'        : "The URL schema is invalid (accepts http or https)",
+		'InvalidHeader'        : "The request was somehow invalid.",
+		'ChunkedEncodingError' : "The server declared chunked encoding but sent an invalid chunk.",
+		'ContentDecodingError' : "Failed to decode response content.",
+		'StreamConsumedError'  : "The content for this response was already consumed.",
+		'RetryError'           : "Custom retries logic failed.",
+		'UnrewindableBodyError': "Requests encountered an error when trying to rewind a body"
+	}.get(etype,  str(e))
+
 #+---------------------------------------------------------
 #| HELPER GET FONT DATA
 #+---------------------------------------------------------
@@ -161,7 +259,7 @@ class index:
 # DejaVuSans.ttf, woff, 147000, <ressource file>
 def fontdata(filename, filetype, filesize, file):
 	font     = TTFont(file)
-	basename = filename.rsplit('.', 1)[0]
+	basename = os.path.basename(filename).rsplit('.', 1)[0]
 
 	# Info
 	head = [] 
@@ -206,7 +304,7 @@ def fontdata(filename, filetype, filesize, file):
 	# Get features list for GPOS and GSUB
 	features = []
 	for table in ['GPOS', 'GSUB']:
-		if not table in font:
+		if not table in font or not hasattr(font[table].table, "FeatureList") or not hasattr(font[table].table.FeatureList, "FeatureRecord"):
 			continue
 		data = {}
 

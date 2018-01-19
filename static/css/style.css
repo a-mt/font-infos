@@ -178,3 +178,22 @@ table.glyphs td.empty {
     width: 1em;
     font-style: normal;
 }
+#list td {
+    vertical-align: top;
+    border: 1px solid transparent;
+}
+#list td.name {
+    background: #CAD5F7;
+}
+#list tr:nth-child(2n) td.name {
+    background: #B8C7F4;
+}
+#list tr:hover td {
+    background: ghostwhite !important;
+    border: 1px solid #ccc;
+}
+
+#list .category { width: 12ch; }
+#list .filesize { width: 9ch; }
+#list .glyphs { width: 6ch; }
+#list .infos { width: 40%; font-size: .9em; }

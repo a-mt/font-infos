@@ -1,0 +1,39 @@
+$def with (db)
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8" />
+		<title>Font list</title>
+		<link rel="stylesheet" href="static/css/style.css" type="text/css" media="screen" charset="utf-8"/>
+	</head>
+	<body>
+		<h1>List of fonts</h1>
+
+		<table id="list" class="tabular">
+			<thead>
+				<th class="name">Name</th>
+				<th class="category">Category</th>
+				<th class="filesize">Filesize</th>
+				<th class="glyphs">Glyphs</th>
+				<th class="infos">Infos</th>
+			</thead>
+			<tbody>
+			$for name in db:
+				$ item = db[name]
+				<tr>
+					<td class="name">$name</td>
+					<td class="category">$(item["category"])</td>
+					<td class="filesize">$(item["filesize"])</td>
+					<td class="glyphs">$(item["numGlyphs"])</td>
+					<td class="infos">
+						Subsets  : $(", ".join(item["subsets"]))
+						$if len(item["features"]) > 0:
+							<br>Features : $(", ".join(item["features"]))
+						<br><a href="https://fonts.google.com/specimen/$name">Google Font</a>, <a href="/?import=$(item['file'])">Infos</a>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</body>
+</html>
