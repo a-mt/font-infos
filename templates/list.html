@@ -10,12 +10,140 @@ $def with (db)
 	<body>
 		<h1>List of fonts</h1>
 
+		<div class="filter">
+		<h2>Filter</h2>
+			<div class="row">
+				<label for="category">Category</label>
+				<select id="category" autocomplete="off" data-filter=".js-category">
+					<option selected value="">--</option>
+					<option value="display">Display</option>
+					<option value="handwriting">Handwriting</option>
+					<option value="monospace">Monospace</option>
+					<option value="sans-serif">Sans-serif</option>
+					<option value="serif">Serif</option>
+				</select>
+			</div>
+			<div class="row">
+				<label for="subset">Subsets</label>
+				<select id="subset" multiple autocomplete="off" data-filter=".js-subsets">
+					<option selected value="arabic">Arabic</option>
+					<option selected value="bengali">Bengali</option>
+					<option selected value="cyrillic">Cyrillic</option>
+					<option selected value="cyrillic-ext">Cyrillic extended</option>
+					<option selected value="devanagari">Devanagari</option>
+					<option selected value="greek">Greek</option>
+					<option selected value="greek-ext">Greek extended</option>
+					<option selected value="gujarati">Gujarati</option>
+					<option selected value="gurmukhi">Gurmukhi</option>
+					<option selected value="hebrew">Hebrew</option>
+					<option selected value="kannada">Kannada</option>
+					<option selected value="khmer">Khmer</option>
+					<option selected value="latin">Latin</option>
+					<option selected value="latin-ext">Latin extended</option>
+					<option selected value="malayalam">Malayalam</option>
+					<option selected value="myanmar">Myanmar</option>
+					<option selected value="oriya">Oriya</option>
+					<option selected value="sinhala">Sinhala</option>
+					<option selected value="tamil">Tamil</option>
+					<option selected value="telugu">Telugu</option>
+					<option selected value="thai">Thai</option>
+					<option selected value="vietnamese">Vietnamese</option>
+				</select>
+			</div>
+			<div class="row">
+				<label for="feature">Features</label>
+				<select id="features" multiple autocomplete="off" data-filter=".js-features">
+					<option selected value="CAPS">CAPS</option>
+					<option selected value="aalt">aalt</option>
+					<option selected value="abvf">abvf</option>
+					<option selected value="abvm">abvm</option>
+					<option selected value="abvs">abvs</option>
+					<option selected value="afrc">afrc</option>
+					<option selected value="akhn">akhn</option>
+					<option selected value="blwf">blwf</option>
+					<option selected value="blwm">blwm</option>
+					<option selected value="blws">blws</option>
+					<option selected value="c2pc">c2pc</option>
+					<option selected value="c2sc">c2sc</option>
+					<option selected value="calt">calt</option>
+					<option selected value="case">case</option>
+					<option selected value="ccmp">ccmp</option>
+					<option selected value="cjct">cjct</option>
+					<option selected value="clig">clig</option>
+					<option selected value="cpsp">cpsp</option>
+					<option selected value="crcy">crcy</option>
+					<option selected value="cswh">cswh</option>
+					<option selected value="curs">curs</option>
+					<option selected value="cv**">cv**</option>
+					<option selected value="dist">dist</option>
+					<option selected value="dlig">dlig</option>
+					<option selected value="dnom">dnom</option>
+					<option selected value="fina">fina</option>
+					<option selected value="frac">frac</option>
+					<option selected value="half">half</option>
+					<option selected value="haln">haln</option>
+					<option selected value="hist">hist</option>
+					<option selected value="hlig">hlig</option>
+					<option selected value="init">init</option>
+					<option selected value="isol">isol</option>
+					<option selected value="jalt">jalt</option>
+					<option selected value="kern">kern</option>
+					<option selected value="lig">lig</option>
+					<option selected value="liga">liga</option>
+					<option selected value="lnum">lnum</option>
+					<option selected value="locl">locl</option>
+					<option selected value="mark">mark</option>
+					<option selected value="medi">medi</option>
+					<option selected value="mgrk">mgrk</option>
+					<option selected value="mkmk">mkmk</option>
+					<option selected value="nalt">nalt</option>
+					<option selected value="nukt">nukt</option>
+					<option selected value="numr">numr</option>
+					<option selected value="onum">onum</option>
+					<option selected value="ordn">ordn</option>
+					<option selected value="ornm">ornm</option>
+					<option selected value="pcap">pcap</option>
+					<option selected value="pnum">pnum</option>
+					<option selected value="pref">pref</option>
+					<option selected value="pres">pres</option>
+					<option selected value="pstf">pstf</option>
+					<option selected value="psts">psts</option>
+					<option selected value="rclt">rclt</option>
+					<option selected value="rkrf">rkrf</option>
+					<option selected value="rlig">rlig</option>
+					<option selected value="rphf">rphf</option>
+					<option selected value="rtlm">rtlm</option>
+					<option selected value="salt">salt</option>
+					<option selected value="sinf">sinf</option>
+					<option selected value="size">size</option>
+					<option selected value="smcp">smcp</option>
+					<option selected value="ss">ss**</option>
+					<option selected value="subs">subs</option>
+					<option selected value="sups">sups</option>
+					<option selected value="swsh">swsh</option>
+					<option selected value="titl">titl</option>
+					<option selected value="tnum">tnum</option>
+					<option selected value="vatu">vatu</option>
+					<option selected value="vert">vert</option>
+					<option selected value="vkrn">vkrn</option>
+					<option selected value="vpal">vpal</option>
+					<option selected value="zero">zero</option>
+					<option selected value="zz">zz**</option>
+				</select>
+			</div>
+			<br>
+			<div class="actions">
+				<button id="filter" class="submit">Appliquer</button>
+			</div>
+		</div>
+
+		<h2>Results</h2>
 		<table id="list" class="tabular">
 			<thead>
-				<th class="name">Name</th>
-				<th class="category">Category</th>
-				<th class="filesize">Filesize</th>
-				<th class="glyphs">Glyphs</th>
+				<th class="name sortable">Name</th>
+				<th class="category sortable">Category</th>
+				<th class="filesize sortable numeric">Filesize</th>
+				<th class="glyphs sortable numeric">Glyphs</th>
 				<th class="infos">Infos</th>
 			</thead>
 			<tbody>
@@ -23,17 +151,150 @@ $def with (db)
 				$ item = db[name]
 				<tr>
 					<td class="name">$name</td>
-					<td class="category">$(item["category"])</td>
+					<td class="category js-category">$(item["category"])</td>
 					<td class="filesize">$(item["filesize"])</td>
 					<td class="glyphs">$(item["numGlyphs"])</td>
 					<td class="infos">
-						Subsets  : $(", ".join(item["subsets"]))
+						Subsets  : <span class="js-subsets">$(", ".join(item["subsets"]))</span>
 						$if len(item["features"]) > 0:
-							<br>Features : $(", ".join(item["features"]))
+							<br>Features : <span class="js-features">$(", ".join(item["features"]))</span>
 						<br><a href="https://fonts.google.com/specimen/$name">Google Font</a>, <a href="/?import=$(item['file'])">Infos</a>
 					</td>
 				</tr>
 			</tbody>
 		</table>
+
+		<!-- TABLE SORT -->
+		<script>
+			var collator = new Intl.Collator("en");
+
+			function handleSort(e) {
+				var asc     = e.target.classList.contains("sort-asc"),
+					column  = e.target.parentNode.parentNode,
+					index   = column.cellIndex,
+					numeric = column.classList.contains("numeric");
+
+				var table   = document.getElementById("list"),
+					tbody   = table.querySelector("tbody");
+
+				// Reverse order ?
+				if(column.classList.contains("active")) {
+
+					// Change classes
+					if(column.classList.contains("sort-" + (asc ? "asc" : "desc"))) {
+						return;
+					}
+					column.classList.remove("sort-" + (asc ? "desc" : "asc"));
+					column.classList.add("sort-" + (asc ? "asc" : "desc"));
+
+					// Reorder rows
+					var rows = [].slice.call(tbody.querySelectorAll("tr"));
+					tbody.innerHTML = "";
+
+					for (var i = rows.length - 1; i >= 0; i--){
+						tbody.appendChild(rows[i]);
+					}
+
+				} else {
+					// Change classes
+					table.querySelectorAll("th.active").forEach(function(th){
+						th.classList.remove("active");
+						th.classList.remove("sort-asc");
+						th.classList.remove("sort-desc");
+					});
+					column.classList.add("active");
+					column.classList.add("sort-" + (asc ? "asc" : "desc"));
+
+					// Reorder rows
+					var rows = [].slice.call(tbody.querySelectorAll("tr"));
+
+					rows = rows.sort(function(a, b){
+						var vA = a.children[index].innerText,
+							 vB = b.children[index].innerText;
+
+						if(numeric) {
+							return parseFloat(vA) - parseFloat(vB);
+						} else {
+							return collator.compare(vA,vB);
+						}
+					});
+
+					tbody.innerHTML = "";
+					if(asc) {
+						for (var i = 0; i < rows.length; i++){
+							tbody.appendChild(rows[i]);
+						}
+					} else {
+						for (var i = rows.length - 1; i >= 0; i--){
+							tbody.appendChild(rows[i]);
+						}
+					}
+				}
+			}
+			function handleFilter(e) {
+				var filter = {};
+
+				// Check what filter we should apply
+				document.body.querySelectorAll("select").forEach(function(select){
+					var selected = [], n = 0;
+					[].slice.call(select.children).forEach(function(option){
+						n++;
+						if(option.selected && option.value) {
+							selected.push(option.value);
+						}
+					});
+					if(selected.length == n || selected.length == 0) {
+						return;
+					}
+					filter[select.getAttribute("data-filter")] = selected;
+				});
+
+				var table = document.getElementById("list");
+
+				if(Object.keys(filter).length > 0) {
+					table.classList.add("hasfilter");
+
+					table.querySelectorAll("tbody tr").forEach(function(tr){
+						for(var selector in filter) {
+							var node = tr.querySelector(selector);
+							if(!node) {
+								tr.classList.add("hide");
+								return;
+							}
+
+							// Check if contains value
+							for(var k in filter[selector]) {
+								if(node.innerText.indexOf(filter[selector][k]) == -1) {
+									tr.classList.add("hide");
+									return;
+								}
+							}
+						}
+						tr.classList.remove("hide");
+					});
+				} else {
+					table.classList.remove("hasfilter");
+				}
+			}
+			function initListeners(){
+
+				// Filter visible
+				document.getElementById("filter").addEventListener("click", handleFilter);
+
+				// Sort table
+				var table = document.getElementById("list");
+
+				table.querySelectorAll("th.sortable").forEach(function(th){
+					th.innerHTML += '<div class="actions">'
+								 +  '<button class="sort sort-asc">&#x025B4</button>'
+								 +  '<button class="sort sort-desc">&#x025BE;</button>'
+								 + '</div>';
+				});
+				table.querySelectorAll(".sort").forEach(function(sort){
+					sort.addEventListener('click', handleSort);
+				});
+			}
+			window.onload = initListeners();
+		</script>
 	</body>
 </html>
