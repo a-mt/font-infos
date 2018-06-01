@@ -177,7 +177,10 @@ class index:
 				session.error = getHTTPError(e)
 				raise web.seeother("/")
 
-			filesize  = int(response.headers['content-length'])
+			if response.headers['transfer-encoding'] == 'chunked':
+				filesize = len(response.content)
+			else:
+				filesize = int(response.headers['content-length'])
 
 		# Check we've got a valid font extension (TTF/OTF/WOFF)
 		extension = os.path.splitext(filename)[1][1:].lower()
