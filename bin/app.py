@@ -177,7 +177,7 @@ class index:
 				session.error = getHTTPError(e)
 				raise web.seeother("/")
 
-			if response.headers['transfer-encoding'] == 'chunked':
+			if 'transfer-encoding' in response.headers and response.headers['transfer-encoding'] == 'chunked':
 				filesize = len(response.content)
 			else:
 				filesize = int(response.headers['content-length'])
